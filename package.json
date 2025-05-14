@@ -1,21 +1,47 @@
 {
-  "name": "vite-vue-template",
+  "name": "field-template",
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "keywords": [
+    "vue-form-generator",
+    "vue3-form-generator"
+  ],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "dev": "vite",
     "test": "vitest",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview"
   },
+  "main": "./dist/field-template.js",
+  "exports": {
+    ".": {
+      "import": "./dist/field-template.js"
+    }
+  },
+  "release": {
+    "branches": [
+      "production"
+    ],
+    "tagFormat": "${version}",
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      "@semantic-release/npm",
+      "@semantic-release/github"
+    ]
+  },
   "dependencies": {
-    "vue": "^3.5.13",
-    "vue-router": "^4.5.0"
+    "@kevinkosterr/vue3-form-generator": "latest",
+    "vue": "^3.5.13"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "^3.0.1",
     "@stylistic/eslint-plugin-ts": "^3.0.1",
+    "@types/node": "^22.15.18",
     "@typescript-eslint/parser": "^8.26.1",
     "@vitejs/plugin-vue": "^5.2.1",
     "@vue/test-utils": "^2.4.6",
