@@ -19,7 +19,7 @@ const { field, model } = toRefs(props)
 const { currentModelValue } = useFormModel(model.value, field.value)
 const { validate, errors } = useFieldValidate(model.value, field.value)
 
-const { isRequired, isDisabled, isReadonly, isVisible } = useFieldAttributes(model.value, field.value)
+const { isRequired, isDisabled, isReadonly, isVisible, hint } = useFieldAttributes(model.value, field.value)
 
 /**
  * Emits an `onInput` event when the value of the field has changed.
@@ -28,6 +28,7 @@ const { isRequired, isDisabled, isReadonly, isVisible } = useFieldAttributes(mod
  * @param {HTMLInputElement} target - target of the event.
  */
 const onFieldValueChanged = ({ target }) => {
+  // We'll reset the errors here, because the value has changed we need to validate it again.
   errors.value = []
   emits('onInput', target.value)
 }
@@ -45,6 +46,15 @@ const onBlur = () => {
     )
   })
 }
+
+/**
+ * There's a few reasons you'll want to use defineExpose in your Composition API component:
+ * - Hints: you'll need this if you want to support the `hint` property for your field.
+ * - Errors: you'll need this for any kind of validation to work properly.
+ * - noLabel, must be true if you don't want the FormGroup to render a label by itself. You can still include a custom
+ *    one in your field component if you want though.
+ * */
+defineExpose({ hint, errors })
 </script>
 
 <style scoped lang="scss">
