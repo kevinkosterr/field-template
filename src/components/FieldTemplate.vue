@@ -2,24 +2,37 @@
   <input type="text" :value="currentModelValue" @input="onFieldValueChanged" @blur="onBlur">
 </template>
 
-<script setup>
+<script setup lang="ts">
+import type { FieldEmits, FieldProps, FieldPropRefs, FieldBase } from '@kevinkosterr/vue3-form-generator'
 import {
-  useFieldProps,
-  useFieldEmits,
   useFieldAttributes,
-  useFieldValidate,
-  useFormModel
+  useFormModel,
+  useValidation
 } from '@kevinkosterr/vue3-form-generator'
 import { toRefs } from 'vue'
 
-const emits = defineEmits(useFieldEmits())
-const props = defineProps(useFieldProps())
+type TemplateField = FieldBase & {
+  templateAttribute: string;
+}
 
-const { field, model } = toRefs(props)
+const emits = defineEmits<FieldEmits>()
+const props = defineProps<FieldProps<TemplateField>>()
+
+const { field, model }: FieldPropRefs<TemplateField> = toRefs(props)
 const { currentModelValue } = useFormModel(model.value, field.value)
-const { validate, errors } = useFieldValidate(model.value, field.value)
 
 const { isRequired, isDisabled, isReadonly, isVisible, hint } = useFieldAttributes(model.value, field.value)
+
+const { onBlur, errors, onChanged } = useValidation(
+  model.value,
+  field.value,
+  currentModelValue,
+  props.formOptions,
+  emits,
+  isDisabled.value,
+  isRequired.value,
+  isReadonly.value
+)
 
 /**
  * Emits an `onInput` event when the value of the field has changed.
@@ -27,24 +40,11 @@ const { isRequired, isDisabled, isReadonly, isVisible, hint } = useFieldAttribut
  * to the FormGenerator component. This causes the model of the form to update.
  * @param {HTMLInputElement} target - target of the event.
  */
-const onFieldValueChanged = ({ target }) => {
+const onFieldValueChanged = ({ target }: { target: HTMLInputElement }) => {
   // We'll reset the errors here, because the value has changed we need to validate it again.
   errors.value = []
   emits('onInput', target.value)
-}
-
-/**
- * Validates the current value for this field when the `blur` event was triggered.
- * This is usually default behaviour for any field component that relies on native HTML inputs.
- */
-const onBlur = () => {
-  validate(currentModelValue.value).then((validationErrors) => {
-    emits('validated',
-      validationErrors.length === 0, // Is the current value for this field valid?
-      validationErrors, // Actual errors
-      field.value // Field schema/object
-    )
-  })
+  onChanged()
 }
 
 /**
